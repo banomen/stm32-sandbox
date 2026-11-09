@@ -1,0 +1,11 @@
+# Директории сборки
+build/**
+bld/**
+
+# Настройки редактора/IDE
+.vscode
+
+# Кэш исходников libopencm3 и папки сборки CLion
+.cmake_cache/
+cmake-build-*/
+.idea/
