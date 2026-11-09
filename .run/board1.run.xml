@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Плата 1" type="com.jetbrains.cidr.embedded.openocd.conf.type" factoryName="com.jetbrains.cidr.embedded.openocd.conf.factory" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="mk_sw" TARGET_NAME="mk_sw" CONFIG_NAME="board1" RUN_TARGET_PROJECT_NAME="mk_sw" RUN_TARGET_NAME="mk_sw">
+    <openocd board-config="$PROJECT_DIR$/flash_n_debug/stm32f4discovery.cfg" gdb-port="3333" telnet-port="4444" reset-type="INIT" download-type="ALWAYS" />
+    <method v="2">
+      <option name="CLION.COMPOUND.BUILD" enabled="true" />
+    </method>
+  </configuration>
+</component>

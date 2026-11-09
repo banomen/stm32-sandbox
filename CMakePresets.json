@@ -21,9 +21,5 @@
         "BOARD": "2"
       }
     }
-  ],
-  "buildPresets": [
-    { "name": "board1", "configurePreset": "board1" },
-    { "name": "board2", "configurePreset": "board2" }
   ]
 }
