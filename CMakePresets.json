@@ -2,22 +2,28 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "debug",
-      "displayName": "Debug",
+      "name": "board1",
+      "displayName": "Плата 1",
       "generator": "Ninja",
-      "binaryDir": "build/debug",
+      "binaryDir": "build/board1",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BOARD": "1"
+      }
+    },
+    {
+      "name": "board2",
+      "displayName": "Плата 2",
+      "generator": "Ninja",
+      "binaryDir": "build/board2",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BOARD": "2"
       }
     }
   ],
   "buildPresets": [
-    {
-      "name": "app-debug",
-      "displayName": "App Debug Build",
-      "configurePreset": "debug",
-      "configuration": "Debug"
-    }
+    { "name": "board1", "configurePreset": "board1" },
+    { "name": "board2", "configurePreset": "board2" }
   ]
 }
-

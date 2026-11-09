@@ -2,8 +2,22 @@ message(CHECK_START "\tSources")
 
 
 # Название прошивки определяется названием проекта (определено в основном сценарии cmake)
+# Какую плату собирать: 1 или 2. У каждой платы своя папка сборки
+# (пресеты board1 / board2 в CMakePresets.json).
+set(BOARD 1 CACHE STRING "Плата: 1 или 2")
+set_property(CACHE BOARD PROPERTY STRINGS 1 2)
+if(NOT BOARD MATCHES "^[12]$")
+    message(FATAL_ERROR "BOARD должен быть 1 или 2, сейчас: ${BOARD}")
+endif()
+message(STATUS "		Board: ${BOARD}")
+
+# Код, общий для обеих плат
+set(COMMON_SOURCES
+)
+
 add_executable(${CMAKE_PROJECT_NAME}
-    main.cpp
+    board${BOARD}.cpp
+    ${COMMON_SOURCES}
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}

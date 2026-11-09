@@ -24,17 +24,23 @@ Visual Studio Code c плагинами ():
 Исходники libopencm3 скачиваются при первой настройке в `.cmake_cache/libopencm3`
 и собираются один раз (около минуты).
 
+В проекте две прошивки — для платы 1 и платы 2. Плата выбирается переменной
+`BOARD`, у каждой своя папка сборки:
+
 ```
-cmake -G Ninja -B build
-cmake --build build
+cmake --preset board1
+cmake --build build/board1
+cmake --preset board2
+cmake --build build/board2
 ```
 
-Результат: `build/firmware.elf` (+ `.bin`, `.hex`).
+Результат: `build/board1/firmware.elf` и `build/board2/firmware.elf` (+ `.bin`, `.hex`).
+Код плат: `src/board1.cpp`, `src/board2.cpp`, общее — `src/common.hpp`.
 
 ### Прошивка (ST-LINK на плате STM32F4DISCOVERY)
 
 ```
-cmake --build build --target flash
+cmake --build build/board1 --target flash
 ```
 
 `--target reset` — только перезапустить МК.
