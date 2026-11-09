@@ -57,6 +57,22 @@ Toolchain должен быть Windows-овый (System / MinGW), а не WSL: 
 вызывает Windows-компилятор с путями `/mnt/c/...`, и сборка ломается.
 Settings → Build → Toolchains → Default = System, генератор Ninja.
 
+Прошивка и отладка из CLion — готовые конфигурации «Плата 1» и «Плата 2»
+(лежат в `.run/`, CLion подхватывает их сам). Один раз настроить:
+
+1. Settings → Build, Execution, Deployment → CMake: включить профили `board1` и
+   `board2` (они берутся из `CMakePresets.json`).
+2. Settings → Build, Execution, Deployment → Embedded Development → OpenOCD Location:
+   путь к настоящему `openocd.exe`, не к обёртке chocolatey, например
+   `C:\ProgramData\chocolatey\lib\openocd\tools\install\bin\openocd.exe`.
+
+Дальше выбрать конфигурацию «Плата 1» или «Плата 2»:
+
+- Run (Shift+F10) — собрать и прошить, МК запускается;
+- Debug (Shift+F9) — собрать, прошить и начать отладку с точками останова.
+
+Конфигурация openocd для платы: `flash_n_debug/stm32f4discovery.cfg`.
+
 ## Ветка uart-spi: компьютер → UART → плата 1 → SPI → плата 2 → UART → компьютер
 
 Плата 1 принимает строку (до `\n`, не длиннее 64 байт) и передаёт её по SPI.
