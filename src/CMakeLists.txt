@@ -13,6 +13,7 @@ message(STATUS "		Board: ${BOARD}")
 
 # Код, общий для обеих плат
 set(COMMON_SOURCES
+    i2c_slave.cpp
 )
 
 add_executable(${CMAKE_PROJECT_NAME}
