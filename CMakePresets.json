@@ -2,22 +2,33 @@
   "version": 6,
   "configurePresets": [
     {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "System"
+        }
+      }
+    },
+    {
       "name": "board1",
       "displayName": "Плата 1",
-      "generator": "Ninja",
+      "inherits": "base",
       "binaryDir": "build/board1",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
         "BOARD": "1"
       }
     },
     {
       "name": "board2",
       "displayName": "Плата 2",
-      "generator": "Ninja",
+      "inherits": "base",
       "binaryDir": "build/board2",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
         "BOARD": "2"
       }
     }
