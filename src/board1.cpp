@@ -7,7 +7,8 @@
 // SPI2 MOSI  PB15 -> PB15 платы 2
 //
 // Сообщение — строка до '\n' или '\r' (без самого символа), не длиннее MSG_MAX.
-// Одно сообщение = одна посылка SPI, пока NSS прижат к земле.
+// Посылка SPI: сначала байт длины (1..MSG_MAX), затем сами байты сообщения.
+// На время посылки NSS прижат к земле.
 // Зелёный светодиод мигает на каждое отправленное сообщение.
 
 #include "common.hpp"
@@ -15,8 +16,8 @@
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/spi.h>
 
-static Msg uart_rx;                       // собирается в прерывании
-static Msg to_send;                       // готовое сообщение для main
+static Msg uart_rx;
+static Msg to_send;
 static volatile bool to_send_ready = false;
 
 extern "C" void usart2_isr() {
@@ -31,7 +32,7 @@ extern "C" void usart2_isr() {
      }
 
      if ((line_end && uart_rx.len > 0) || uart_rx.len == MSG_MAX) {
-          if (!to_send_ready) { // если main ещё не забрал прошлое — новое теряется
+          if (!to_send_ready) {
                to_send = uart_rx;
                to_send_ready = true;
           }
@@ -47,11 +48,11 @@ static void spi_master_init() {
      gpio_set_output_options(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, GPIO13 | GPIO15);
      gpio_set_af(GPIOB, GPIO_AF5, GPIO13 | GPIO14 | GPIO15);
 
-     gpio_set(GPIOB, GPIO12); // NSS неактивен
+     gpio_set(GPIOB, GPIO12);
      gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
 
      rcc_periph_reset_pulse(RST_SPI2);
-     // 42 МГц / 64 = ~656 кГц, режим 0, 8 бит, старшим битом вперёд
+     // 42 МГц / 64 = ~656 кГц
      spi_init_master(SPI2, SPI_CR1_BAUDRATE_FPCLK_DIV_64, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
                      SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
      spi_enable_software_slave_management(SPI2);
@@ -61,12 +62,13 @@ static void spi_master_init() {
 
 static void spi_send_msg(const Msg& msg) {
      gpio_clear(GPIOB, GPIO12);
+     (void)spi_xfer(SPI2, static_cast<uint8_t>(msg.len)); // по нему плата 2 узнает, сколько ждать
      for (size_t i = 0; i < msg.len; i++) {
-          (void)spi_xfer(SPI2, msg.data[i]); // ждёт окончания байта
+          (void)spi_xfer(SPI2, msg.data[i]);
      }
      while (SPI_SR(SPI2) & SPI_SR_BSY) {
      }
-     gpio_set(GPIOB, GPIO12); // по фронту NSS плата 2 считает сообщение законченным
+     gpio_set(GPIOB, GPIO12);
 }
 
 int main() {
