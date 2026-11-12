@@ -11,6 +11,9 @@
 // Максимальная длина одного сообщения
 constexpr size_t MSG_MAX = 64;
 
+// Адрес платы 2 на шине I2C (7 бит). 0x4A занят аудиокодеком на Discovery.
+constexpr uint8_t BOARD2_ADDR = 0x20;
+
 struct Msg {
      uint8_t data[MSG_MAX];
      size_t len;

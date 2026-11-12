@@ -15,8 +15,6 @@
 
 #include <libopencm3/cm3/nvic.h>
 
-constexpr uint8_t BOARD2_ADDR = 0x20;
-
 static Msg uart_rx;                       // собирается в прерывании
 static Msg to_send;                       // готовое сообщение для main
 static volatile bool to_send_ready = false;
@@ -33,7 +31,7 @@ extern "C" void usart2_isr() {
      }
 
      if ((line_end && uart_rx.len > 0) || uart_rx.len == MSG_MAX) {
-          if (!to_send_ready) { // если main ещё не забрал прошлое — новое теряется
+          if (!to_send_ready) {
                to_send = uart_rx;
                to_send_ready = true;
           }
@@ -62,8 +60,6 @@ static bool i2c_tx_byte(uint8_t byte) {
      return i2c_wait_sr1(I2C_SR1_TxE | I2C_SR1_AF) && (I2C_SR1(I2C1) & I2C_SR1_AF) == 0;
 }
 
-// Запись сообщения слейву: байт длины, затем данные. В отличие от i2c_transfer7
-// из libopencm3 не зависает, если слейв не отвечает: false при NACK или таймауте.
 static bool i2c_write(uint8_t address, const uint8_t* data, size_t len) {
      for (uint32_t i = 0; I2C_SR2(I2C1) & I2C_SR2_BUSY; i++) {
           if (i > 200'000) {
@@ -84,7 +80,7 @@ static bool i2c_write(uint8_t address, const uint8_t* data, size_t len) {
      }
      (void)I2C_SR2(I2C1); // сброс ADDR
 
-     bool ok = i2c_tx_byte(static_cast<uint8_t>(len)); // по нему плата 2 узнает, сколько ждать
+     bool ok = i2c_tx_byte(static_cast<uint8_t>(len));
      for (size_t i = 0; ok && i < len; i++) {
           ok = i2c_tx_byte(data[i]);
      }
@@ -94,7 +90,7 @@ static bool i2c_write(uint8_t address, const uint8_t* data, size_t len) {
           return false;
      }
 
-     ok = i2c_wait_sr1(I2C_SR1_BTF); // последний байт ушёл целиком
+     ok = i2c_wait_sr1(I2C_SR1_BTF);
      i2c_send_stop(I2C1);
      return ok;
 }
@@ -119,7 +115,7 @@ int main() {
                     led_toggle(LED_GREEN);
                } else {
                     led_on(LED_RED);
-                    i2c_master_init(); // сброс шины после ошибки
+                    i2c_master_init();
                }
           }
      }

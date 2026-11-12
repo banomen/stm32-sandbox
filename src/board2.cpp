@@ -16,8 +16,6 @@
 
 #include <libopencm3/cm3/nvic.h>
 
-constexpr uint8_t BOARD2_ADDR = 0x20;
-
 static Msg i2c_rx;                        // собирается в прерывании
 static size_t expected_len = 0;           // 0 — ждём байт длины
 static bool skip_rest = false;            // до конца транзакции байты не нужны
@@ -93,7 +91,7 @@ static void i2c_slave_init() {
      nvic_enable_irq(NVIC_I2C1_ER_IRQ);
 
      i2c_peripheral_enable(I2C1);
-     i2c_enable_ack(I2C1); // ACK можно включить только при включённом модуле
+     i2c_enable_ack(I2C1);
 }
 
 int main() {
