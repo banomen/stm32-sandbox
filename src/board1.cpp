@@ -62,7 +62,7 @@ static void spi_master_init() {
 
 static void spi_send_msg(const Msg& msg) {
      gpio_clear(GPIOB, GPIO12);
-     (void)spi_xfer(SPI2, static_cast<uint8_t>(msg.len)); // по нему плата 2 узнает, сколько ждать
+     (void)spi_xfer(SPI2, static_cast<uint8_t>(msg.len));
      for (size_t i = 0; i < msg.len; i++) {
           (void)spi_xfer(SPI2, msg.data[i]);
      }

@@ -1,4 +1,3 @@
-// Общее для обеих плат: тактирование, светодиоды, UART к компьютеру.
 #pragma once
 
 #include <cstddef>
@@ -8,7 +7,6 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
 
-// Максимальная длина одного сообщения
 constexpr size_t MSG_MAX = 64;
 
 struct Msg {
@@ -16,17 +14,14 @@ struct Msg {
      size_t len;
 };
 
-// Барьер для компилятора: данные, записанные в прерывании, читаются заново
 inline void compiler_barrier() {
      __asm__ volatile("" ::: "memory");
 }
 
-// 168 МГц от кварца 8 МГц (STM32F4DISCOVERY). APB1 = 42 МГц, APB2 = 84 МГц.
 inline void clock_init() {
      rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);
 }
 
-// Светодиоды платы: PD12 зелёный, PD13 оранжевый, PD14 красный, PD15 синий
 constexpr uint16_t LED_GREEN = GPIO12;
 constexpr uint16_t LED_ORANGE = GPIO13;
 constexpr uint16_t LED_RED = GPIO14;
@@ -45,7 +40,6 @@ inline void led_on(uint16_t led) {
      gpio_set(GPIOD, led);
 }
 
-// USART2 к компьютеру (через USB-UART переходник): PA2 = TX, PA3 = RX, 115200 8N1
 constexpr uint32_t UART_BAUD = 115'200;
 
 inline void uart_init() {

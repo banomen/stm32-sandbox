@@ -26,9 +26,9 @@ extern "C" void spi2_isr() {
      }
      const auto byte = static_cast<uint8_t>(SPI_DR(SPI2));
 
-     if (expected_len == 0) { // первый байт посылки — длина
+     if (expected_len == 0) {
           if (byte == 0 || byte > MSG_MAX) {
-               return; // такой длины не бывает: пропускаем байт и ждём следующую длину
+               return;
           }
           expected_len = byte;
           spi_rx.len = 0;
@@ -36,8 +36,8 @@ extern "C" void spi2_isr() {
      }
 
      spi_rx.data[spi_rx.len++] = byte;
-     if (spi_rx.len == expected_len) { // приняли столько, сколько обещали
-          if (!received_ready) { // если main ещё не забрал прошлое — новое теряется
+     if (spi_rx.len == expected_len) {
+          if (!received_ready) {
                received = spi_rx;
                received_ready = true;
           }
@@ -50,7 +50,7 @@ static void spi_slave_init() {
      rcc_periph_clock_enable(RCC_SPI2);
 
      gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO13 | GPIO14 | GPIO15);
-     gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO12); // без мастера NSS неактивен
+     gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO12);
      gpio_set_af(GPIOB, GPIO_AF5, GPIO12 | GPIO13 | GPIO14 | GPIO15);
 
      rcc_periph_reset_pulse(RST_SPI2);
@@ -59,7 +59,7 @@ static void spi_slave_init() {
      spi_set_clock_polarity_0(SPI2);
      spi_set_clock_phase_0(SPI2);
      spi_send_msb_first(SPI2);
-     spi_disable_software_slave_management(SPI2); // NSS с ножки PB12
+     spi_disable_software_slave_management(SPI2);
      spi_enable_rx_buffer_not_empty_interrupt(SPI2);
 
      nvic_enable_irq(NVIC_SPI2_IRQ);
