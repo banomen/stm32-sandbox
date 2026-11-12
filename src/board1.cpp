@@ -5,7 +5,8 @@
 //   I2C1 SDA   PB9  <> PB9 платы 2
 //
 // Сообщение — строка до '\n' или '\r' (без самого символа), не длиннее MSG_MAX.
-// Одно сообщение = одна транзакция записи I2C на адрес платы 2.
+// Одно сообщение = одна транзакция записи I2C на адрес платы 2:
+// START, адрес+W, байт длины (1..MSG_MAX), байты сообщения, STOP.
 // Зелёный светодиод мигает на каждое переданное сообщение,
 // красный загорается, если плата 2 не ответила.
 
@@ -55,8 +56,14 @@ static bool i2c_wait_sr1(uint32_t bits) {
      return false;
 }
 
-// Запись сообщения слейву. В отличие от i2c_transfer7 из libopencm3 не зависает,
-// если слейв не отвечает: false при NACK или таймауте.
+// Отправить один байт данных. false — слейв ответил NACK или таймаут.
+static bool i2c_tx_byte(uint8_t byte) {
+     i2c_send_data(I2C1, byte);
+     return i2c_wait_sr1(I2C_SR1_TxE | I2C_SR1_AF) && (I2C_SR1(I2C1) & I2C_SR1_AF) == 0;
+}
+
+// Запись сообщения слейву: байт длины, затем данные. В отличие от i2c_transfer7
+// из libopencm3 не зависает, если слейв не отвечает: false при NACK или таймауте.
 static bool i2c_write(uint8_t address, const uint8_t* data, size_t len) {
      for (uint32_t i = 0; I2C_SR2(I2C1) & I2C_SR2_BUSY; i++) {
           if (i > 200'000) {
@@ -77,16 +84,17 @@ static bool i2c_write(uint8_t address, const uint8_t* data, size_t len) {
      }
      (void)I2C_SR2(I2C1); // сброс ADDR
 
-     for (size_t i = 0; i < len; i++) {
-          i2c_send_data(I2C1, data[i]);
-          if (!i2c_wait_sr1(I2C_SR1_TxE | I2C_SR1_AF) || (I2C_SR1(I2C1) & I2C_SR1_AF)) {
-               I2C_SR1(I2C1) &= ~I2C_SR1_AF;
-               i2c_send_stop(I2C1);
-               return false;
-          }
+     bool ok = i2c_tx_byte(static_cast<uint8_t>(len)); // по нему плата 2 узнает, сколько ждать
+     for (size_t i = 0; ok && i < len; i++) {
+          ok = i2c_tx_byte(data[i]);
+     }
+     if (!ok) {
+          I2C_SR1(I2C1) &= ~I2C_SR1_AF;
+          i2c_send_stop(I2C1);
+          return false;
      }
 
-     const bool ok = i2c_wait_sr1(I2C_SR1_BTF); // последний байт ушёл целиком
+     ok = i2c_wait_sr1(I2C_SR1_BTF); // последний байт ушёл целиком
      i2c_send_stop(I2C1);
      return ok;
 }
