@@ -12,7 +12,6 @@
 // Зелёный светодиод мигает на каждое принятое сообщение.
 
 #include "common.hpp"
-#include "i2c_bus.hpp"
 
 #include <libopencm3/cm3/nvic.h>
 

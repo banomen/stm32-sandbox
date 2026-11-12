@@ -11,7 +11,6 @@
 // красный загорается, если плата 2 не ответила.
 
 #include "common.hpp"
-#include "i2c_bus.hpp"
 
 #include <libopencm3/cm3/nvic.h>
 

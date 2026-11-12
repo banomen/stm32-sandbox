@@ -1,10 +1,11 @@
-// Общее для обеих плат: тактирование, светодиоды, UART к компьютеру.
+// Общее для обеих плат: тактирование, светодиоды, UART к компьютеру, шина I2C между платами.
 #pragma once
 
 #include <cstddef>
 #include <cstdint>
 
 #include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/i2c.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/usart.h>
 
@@ -77,4 +78,25 @@ inline void uart_write_str(const char* s) {
      while (*s != '\0') {
           usart_send_blocking(USART2, static_cast<uint8_t>(*s++));
      }
+}
+
+// Шина I2C между платами: I2C1, PB6 = SCL, PB9 = SDA, 100 кГц.
+//
+// На STM32F4DISCOVERY эти ножки уже подтянуты к 3.3 В резисторами на плате
+// (на шине висит аудиокодек CS43L22), поэтому внешние резисторы не нужны.
+// Кодек держим в сбросе (PD4 = 0), чтобы он не мешал. Его адрес 0x4A не занимать.
+inline void i2c_bus_init() {
+     rcc_periph_clock_enable(RCC_GPIOB);
+     rcc_periph_clock_enable(RCC_GPIOD);
+     rcc_periph_clock_enable(RCC_I2C1);
+
+     gpio_clear(GPIOD, GPIO4); // сброс CS43L22
+     gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO4);
+
+     gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO6 | GPIO9);
+     gpio_set_output_options(GPIOB, GPIO_OTYPE_OD, GPIO_OSPEED_2MHZ, GPIO6 | GPIO9);
+     gpio_set_af(GPIOB, GPIO_AF4, GPIO6 | GPIO9);
+
+     rcc_periph_reset_pulse(RST_I2C1);
+     i2c_set_speed(I2C1, i2c_speed_sm_100k, rcc_apb1_frequency / 1'000'000);
 }
