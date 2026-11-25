@@ -80,17 +80,12 @@ inline void uart_write_str(const char* s) {
      }
 }
 
-// Шина I2C между платами: I2C1, PB6 = SCL, PB9 = SDA, 100 кГц.
-//
-// На STM32F4DISCOVERY эти ножки уже подтянуты к 3.3 В резисторами на плате
-// (на шине висит аудиокодек CS43L22), поэтому внешние резисторы не нужны.
-// Кодек держим в сбросе (PD4 = 0), чтобы он не мешал. Его адрес 0x4A не занимать.
 inline void i2c_bus_init() {
      rcc_periph_clock_enable(RCC_GPIOB);
      rcc_periph_clock_enable(RCC_GPIOD);
      rcc_periph_clock_enable(RCC_I2C1);
 
-     gpio_clear(GPIOD, GPIO4); // сброс CS43L22
+     gpio_clear(GPIOD, GPIO4);
      gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO4);
 
      gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO6 | GPIO9);
